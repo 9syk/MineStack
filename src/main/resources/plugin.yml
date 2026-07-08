@@ -1,0 +1,9 @@
+name: MineStack
+version: '${version}'
+
+main: link.syk9.mineStack.MineStack
+api-version: '26.1'
+commands:
+  minestack:
+    description: Open MineStack or get a stick.
+    usage: /minestack [stick]

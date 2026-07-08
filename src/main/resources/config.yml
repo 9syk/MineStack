@@ -1,0 +1,5 @@
+enable-stick-command: true
+enable-minestack-command: true
+enable-shared-storage: true
+backup-interval-minutes: 30
+backup-retention: 48
