@@ -1,6 +1,7 @@
 package link.syk9.mineStack;
 
 import link.syk9.mineStack.command.MineStackCommand;
+import link.syk9.mineStack.config.CategoryConfig;
 import link.syk9.mineStack.config.PluginConfig;
 import link.syk9.mineStack.gui.MenuService;
 import link.syk9.mineStack.listener.MenuListener;
@@ -23,6 +24,8 @@ public final class MineStack extends JavaPlugin {
         PluginConfig pluginConfig = new PluginConfig(this);
         ItemRegistry itemRegistry = new ItemRegistry();
         itemRegistry.collect();
+        CategoryConfig categoryConfig = new CategoryConfig(this);
+        categoryConfig.reload(itemRegistry.storableMaterials());
 
         storageRepository = new StorageRepository(this, pluginConfig);
         storageRepository.init();
@@ -30,11 +33,11 @@ public final class MineStack extends JavaPlugin {
         mineStackService = new MineStackService(pluginConfig, storageRepository, itemRegistry);
         mineStackService.load();
 
-        MenuService menuService = new MenuService(this, pluginConfig, mineStackService);
+        MenuService menuService = new MenuService(this, pluginConfig, categoryConfig, mineStackService);
         Bukkit.getPluginManager().registerEvents(new PlayerListener(mineStackService, menuService), this);
         Bukkit.getPluginManager().registerEvents(new MenuListener(menuService), this);
 
-        MineStackCommand commandExecutor = new MineStackCommand(pluginConfig, menuService);
+        MineStackCommand commandExecutor = new MineStackCommand(this, pluginConfig, categoryConfig, itemRegistry, menuService);
         PluginCommand command = getCommand("minestack");
         if (command != null) {
             command.setExecutor(commandExecutor);

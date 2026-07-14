@@ -1,5 +1,6 @@
 package link.syk9.mineStack.gui;
 
+import link.syk9.mineStack.config.CategoryConfig;
 import link.syk9.mineStack.config.PluginConfig;
 import link.syk9.mineStack.model.AutoStoreMode;
 import link.syk9.mineStack.model.Category;
@@ -38,12 +39,14 @@ public final class MenuService {
     private static final int RECENT_END = 35;
 
     private final PluginConfig config;
+    private final CategoryConfig categoryConfig;
     private final MineStackService service;
     private final ItemSorter sorter = new ItemSorter();
     private final NamespacedKey actionKey;
 
-    public MenuService(JavaPlugin plugin, PluginConfig config, MineStackService service) {
+    public MenuService(JavaPlugin plugin, PluginConfig config, CategoryConfig categoryConfig, MineStackService service) {
         this.config = config;
+        this.categoryConfig = categoryConfig;
         this.service = service;
         this.actionKey = new NamespacedKey(plugin, "action");
     }
@@ -74,10 +77,10 @@ public final class MenuService {
 
     public void openItems(Player player, Category category, int page) {
         PlayerStore store = service.store(player);
-        List<Material> materials = service.itemRegistry().storableMaterials().stream()
-                .filter(category::matches)
+        List<Material> materials = categoryConfig.materials(category).stream()
+                .filter(material -> service.itemRegistry().storableMaterials().contains(material))
                 .toList();
-        materials = sorter.sort(materials, store, store.sortMode());
+        materials = sorter.sort(materials, store, store.sortMode(), material -> categoryConfig.order(category, material));
 
         int maxPage = Math.max(0, (materials.size() - 1) / 45);
         int safePage = Math.min(Math.max(0, page), maxPage);
@@ -103,7 +106,7 @@ public final class MenuService {
         List<Material> materials = service.itemRegistry().storableMaterials().stream()
                 .filter(material -> sharedStore.count(material).signum() > 0)
                 .toList();
-        materials = sorter.sort(materials, sharedStore, playerStore.sortMode());
+        materials = sorter.sort(materials, sharedStore, playerStore.sortMode(), categoryConfig::firstOrder);
 
         int maxPage = Math.max(0, (materials.size() - 1) / 45);
         int safePage = Math.min(Math.max(0, page), maxPage);
